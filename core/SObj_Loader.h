@@ -474,6 +474,10 @@ private:
 				// Position & Texture
 				vVert.pos = getElement(iPositions, svert[0]);
 				vVert.texcoords = getElement(iTCoords, svert[1]);
+				if (vVert.texcoords.x > 1)
+					vVert.texcoords.x = vVert.texcoords.x - floor(vVert.texcoords.x);
+				if (vVert.texcoords.y > 1)
+					vVert.texcoords.y = vVert.texcoords.y - floor(vVert.texcoords.y);
 				noNormal = true;
 				oVerts.push_back(vVert);
 			}
@@ -485,6 +489,10 @@ private:
 					// Position, Texture, and Normal
 					vVert.pos = getElement(iPositions, svert[0]);
 					vVert.texcoords = getElement(iTCoords, svert[1]);
+					if (vVert.texcoords.x > 1)
+						vVert.texcoords.x = vVert.texcoords.x - floor(vVert.texcoords.x);
+					if (vVert.texcoords.y > 1)
+						vVert.texcoords.y = vVert.texcoords.y - floor(vVert.texcoords.y);
 					vVert.normal = getElement(iNormals, svert[2]);
 					oVerts.push_back(vVert);
 				}

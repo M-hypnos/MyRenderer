@@ -68,16 +68,32 @@ void SPipeline::drawObj(const SObj_Loader* obj) {
 	}
 }
 
+void clip_triangle(std::vector<shaderVert>& vertIn, std::vector<shaderVert>& vertOut) {
+
+}
+
 void SPipeline::drawMesh(Mesh& mesh) {
 	Matrix viewport = frameBuffer_->getViewport();
 	if (rendererMode_ == RendererMode::Line) {
 		Vec4f vert[3];
 		for (int i = 0; i < mesh.Indices.size(); i += 3) {
+			bool isContinue = false;
 			for (int j = 0; j < 3; j++) {
 				vert[j] = shader_->vertexShader(mesh.Vertices[mesh.Indices[i+j]]);
+
+				if (vert[j].x > vert[j].w || vert[j].x < -vert[j].w
+					|| vert[j].y > vert[j].w || vert[j].y < -vert[j].w
+					|| vert[j].z > vert[j].w || vert[j].z < -vert[j].w)
+				{
+					isContinue = true;
+					break;
+				}
+
 				vert[j].homogeneousAlignment();
 				vert[j] = viewport * vert[j];
 			}
+
+			if (isContinue) continue;
 
 			if (is_back_facing(vert)) continue;
 
@@ -95,17 +111,31 @@ void SPipeline::drawMesh(Mesh& mesh) {
 		Vertex tri[3];
 		Vec4f clip_coord[3];
 		Vec4f screen_coord[3];
+		std::vector<shaderVert> vertIn;
+		std::vector<shaderVert> vertOut;
 		for (int i = 0; i < mesh.Indices.size(); i += 3) {
-			if (i == 24) {
-				int ll = 0;
-			}
 			tri[0] = mesh.Vertices[mesh.Indices[i]];
 			tri[1] = mesh.Vertices[mesh.Indices[i + 1]];
 			tri[2] = mesh.Vertices[mesh.Indices[i + 2]];
 
+			vertIn.clear();
+
+			bool isContinue = false;
 			for (int j = 0; j < 3; j++) {
 				clip_coord[j] = shader_->vertexShader(tri[j]);
+				/*Vec4f p = shader_->vertexShader(tri[j]);
+				vertIn.emplace_back(p, tri[j].normal, tri[j].texcoords);*/
+				if (clip_coord[j].x > clip_coord[j].w || clip_coord[j].x < -clip_coord[j].w
+					|| clip_coord[j].y > clip_coord[j].w || clip_coord[j].y < -clip_coord[j].w
+					|| clip_coord[j].z > clip_coord[j].w || clip_coord[j].z < -clip_coord[j].w)
+				{
+					isContinue = true;
+					break;
+				}
 			}
+			if (isContinue) continue;
+
+			clip_triangle(vertIn, vertOut);
 
 			for (int j = 0; j < 3; j++) {
 				screen_coord[j] = clip_coord[j] / clip_coord[j].w;
@@ -114,22 +144,18 @@ void SPipeline::drawMesh(Mesh& mesh) {
 
 			if (is_back_facing(screen_coord)) continue;
 
-			int minX = std::min(std::min(screen_coord[0].x, screen_coord[1].x), screen_coord[2].x);
-			int minY = std::min(std::min(screen_coord[0].y, screen_coord[1].y), screen_coord[2].y);
-			int maxX = std::max(std::max(screen_coord[0].x, screen_coord[1].x), screen_coord[2].x);
-			int maxY = std::max(std::max(screen_coord[0].y, screen_coord[1].y), screen_coord[2].y);
+			float minX = std::min(std::min(screen_coord[0].x, screen_coord[1].x), screen_coord[2].x);
+			float minY = std::min(std::min(screen_coord[0].y, screen_coord[1].y), screen_coord[2].y);
+			float maxX = std::max(std::max(screen_coord[0].x, screen_coord[1].x), screen_coord[2].x);
+			float maxY = std::max(std::max(screen_coord[0].y, screen_coord[1].y), screen_coord[2].y);
 
-			if (minX >= frameBuffer_->getWidth() || maxX < 0 || minY >= frameBuffer_->getHeight() || maxY < 0) return;
-			minX = std::max(0, minX);
-			maxX = std::min(frameBuffer_->getWidth(), maxX);
-			minY = std::max(0, minY);
-			maxY = std::min(frameBuffer_->getHeight(), maxY);
+			/*if (minX >= frameBuffer_->getWidth() || maxX < 0 || minY >= frameBuffer_->getHeight() || maxY < 0) return;
+			minX = std::max(0.f, minX);
+			maxX = std::min(frameBuffer_->getWidth() - 1.f, maxX);
+			minY = std::max(0.f, minY);
+			maxY = std::min(frameBuffer_->getHeight() -1.f, maxY);*/
 			for (int x = minX; x < maxX; x++) {
 				for (int y = minY; y < maxY; y++) {
-					printf("%d, %d\n", x, y);
-					if (x == 418 && y == 267) {
-						int qq = 9;
-					}
 					Vec3f bc = getBarycentricCoordinates(screen_coord, x + 0.5, y + 0.5);
 					if (bc.x > -1e-5f && bc.y > -1e-5f && bc.z > -1e-5f) {
 						bc.x = bc.x / -clip_coord[0].w;
