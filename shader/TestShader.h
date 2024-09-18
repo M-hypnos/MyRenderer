@@ -6,6 +6,6 @@ class TestShader:
 {
 public:
 	virtual Vec4f vertexShader(const Vertex& input);
-	virtual SColor fragmentShader(const Vertex* input, Vec3f bc, Material& material);
+	virtual SColor fragmentShader(const shaderVert& v1, const shaderVert& v2, const shaderVert& v3, const Vec3f bc, const Material& material);
 };
 

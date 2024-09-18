@@ -51,8 +51,9 @@ int main(int argc, char* argv[])
 
     Scene scene((float)WIDTH / (float)HEIGHT);
     //scene.addModelObject("res/nanosuit/nanosuit.obj");
-    //scene.addModelObject("res/diablo3_pose/diablo3_pose.obj");
-    scene.addModelObject("res/spot/spot_triangulated.obj");
+    //scene.addModelObject("res/Crate/Crate1.obj");
+    //scene.addModelObject("res/spot/spot_triangulated.obj");
+    scene.addModelObject("res/sakura/sakura.obj");
 
     SDL_Event ev;
 
@@ -74,10 +75,16 @@ int main(int argc, char* argv[])
                     isRunning = false;
                     break;
                 case SDLK_j:
-                    scene.setLineMode();
+                    SPipeline::getInstance().setRendererMode(RendererMode::Line);
                     break;
                 case SDLK_k:
-                    scene.setTriangleMode();
+                    SPipeline::getInstance().setRendererMode(RendererMode::Triangle);
+                    break;
+                case SDLK_u:
+                    SPipeline::getInstance().switchBackCulling();
+                    break;
+                case SDLK_i:
+                    SPipeline::getInstance().switchClipTriangle();
                     break;
                 case SDLK_w:
                     scene.moveCamera(MoveDir::Forward);

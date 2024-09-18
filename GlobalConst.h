@@ -13,3 +13,12 @@ enum class MoveDir {
 	Forward,
 	Back,
 };
+
+enum class Plane {
+	XLeft,
+	XRight,
+	YTOP,
+	YBOTTOM,
+	ZNEAR,
+	ZFAR,
+};

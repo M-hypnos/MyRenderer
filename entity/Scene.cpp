@@ -42,14 +42,6 @@ void Scene::onRender() {
 	delete shader;
 }
 
-void Scene::setLineMode() {
-	SPipeline::getInstance().setRendererMode(RendererMode::Line);
-}
-
-void Scene::setTriangleMode() {
-	SPipeline::getInstance().setRendererMode(RendererMode::Triangle);
-}
-
 void Scene::resetCamera() {
 	if (camera_ == nullptr) return;
 	camera_->setParam(cameraEye, cameraFront, cameraUp, cameraFov);

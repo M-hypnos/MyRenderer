@@ -6,10 +6,9 @@ Vec4f TestShader::vertexShader(const Vertex& input) {
 	v = projectMat4 * v;
 	return v;
 }
-SColor TestShader::fragmentShader(const Vertex* input, Vec3f bc, Material& material) {
+SColor TestShader::fragmentShader(const shaderVert& v1, const shaderVert& v2, const shaderVert& v3, const Vec3f bc, const Material& material) {
 
-	Vec2f uv = (input[0].texcoords * bc.x + input[1].texcoords * bc.y + input[2].texcoords * bc.z);
-	//printf("%f, %f\n", uv.x, uv.y);
+	Vec2f uv = (v1.texcoords * bc.x + v2.texcoords * bc.y + v3.texcoords * bc.z);
 	SColor c = STexturePool::getInstance().getTexture(material.Kd_texIdx).getPixel(uv.x, uv.y);
 
 	return c;
