@@ -12,6 +12,8 @@ struct Vertex {
 	Vec3f pos;
 	Vec3f normal;
 	Vec2f texcoords;
+	Vertex() = default;
+	Vertex(Vec3f p, Vec2f t, Vec3f n): pos(p), texcoords(t), normal(n){}
 };
 
 struct Material
@@ -512,7 +514,7 @@ private:
 			Vec3f A = oVerts[0].pos - oVerts[1].pos;
 			Vec3f B = oVerts[2].pos - oVerts[1].pos;
 
-			Vec3f normal = cross(A, B);
+			Vec3f normal = cross(B, A);
 
 			for (int i = 0; i < int(oVerts.size()); i++)
 			{

@@ -1,19 +1,4 @@
 #include "Object.h"
-#include "../core/SPipeline.h"
-
-Object::~Object() {
-	if (obj_loader != nullptr)
-		delete obj_loader;
-}
-
-void Object::addModel(const char* filename) {
-	obj_loader = new SObj_Loader();
-	obj_loader->loadFile(filename);
-}
-
-void Object::onRender() {
-	SPipeline::getInstance().drawObj(obj_loader);
-}
 
 Matrix Object::getModelMat4() {
 	Matrix mat4 = Matrix::identity();

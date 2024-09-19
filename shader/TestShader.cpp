@@ -1,10 +1,10 @@
 #include "TestShader.h"
 #include "../core/STexturePool.h"
 
-Vec4f TestShader::vertexShader(const Vertex& input) {
-	Vec4f v = viewMat4 * modelMat4 * embed<4>(input.pos);
-	v = projectMat4 * v;
-	return v;
+void TestShader::vertexShader(const Vertex& input, shaderVert& output) {
+	Vec4f v = modelMat4 * embed<4>(input.pos);
+	output.world_coords = proj<3>(v);
+	output.clip_coords = projectMat4 * viewMat4 * v;
 }
 SColor TestShader::fragmentShader(const shaderVert& v1, const shaderVert& v2, const shaderVert& v3, const Vec3f bc, const Material& material) {
 

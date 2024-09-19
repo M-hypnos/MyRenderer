@@ -17,6 +17,7 @@ public:
     void bindShader(IShader* shader) { shader_ = shader; }
     //void drawMesh(Mesh& mesh);
     void drawObj(const SObj_Loader* obj);
+    void drawVerts(std::vector<Vertex>& verts, const Material& material);
     void switchBackCulling() { isBackCulling_ = !isBackCulling_; }
     void switchClipTriangle() { isClipTriangle_ = !isClipTriangle_; }
 
@@ -45,7 +46,7 @@ private:
     enum RendererMode rendererMode_;
     SFrameBuffer* frameBuffer_;
     Matrix viewport_;
-    bool isBackCulling_;
-    bool isClipTriangle_;
+    bool isBackCulling_ = true;
+    bool isClipTriangle_ = true;
 };
 

@@ -22,3 +22,9 @@ enum class Plane {
 	ZNEAR,
 	ZFAR,
 };
+
+enum class LightType {
+	Point,
+	Parallel,
+	Spot
+};

@@ -17,6 +17,8 @@ void SCamera::setParam(Vec3f eye, Vec3f front, Vec3f up, float fov) {
 	front_ = front;
 	up_ = up;
 	fov_ = fov;
+	pitch_ = 0.f;
+	yaw_ = -90.f;
 }
 
 Matrix SCamera::getViewMat4() {
