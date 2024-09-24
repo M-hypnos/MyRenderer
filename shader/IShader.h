@@ -1,8 +1,8 @@
 #pragma once
 //#include "../core/SModel.h"
-#include "../core/SObj_loader.h"
+#include "../core/Obj_Loader.h"
 #include "../utils/Math.h"
-#include "../core/SColor.h"
+#include "../core/Color.h"
 
 struct shaderVert
 {
@@ -29,7 +29,8 @@ public:
 	Matrix modelMat4;
 	Matrix viewMat4;
 	Matrix projectMat4;
+	Matrix MVT;
 	virtual void vertexShader(const Vertex& input, shaderVert& output) = 0;
-	virtual SColor fragmentShader(const shaderVert& v1, const shaderVert& v2, const shaderVert& v3, const Vec3f bc, const Material& material) = 0;
+	virtual Color fragmentShader(const shaderVert& v1, const shaderVert& v2, const shaderVert& v3, const Vec3f bc, const Material& material) = 0;
 };
 
