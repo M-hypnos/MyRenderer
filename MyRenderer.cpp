@@ -1,16 +1,16 @@
 ﻿#include <iostream>
 #include <SDL.h>
 //#include <vld.h>
-#include "core/STexture.h"
-#include "core/SFrameBuffer.h"
-#include "core/SPipeline.h"
+#include "core/Texture.h"
+#include "core/FrameBuffer.h"
+#include "core/Pipeline.h"
 #include "entity/Scene.h"
 
 int WIDTH = 800;
 int HEIGHT = 600;
 
-void onDraw(SDL_Renderer* renderer, SFrameBuffer* frameBuffer) {
-    SColor c;
+void onDraw(SDL_Renderer* renderer, FrameBuffer* frameBuffer) {
+    Color c;
     for (int x = 0; x < WIDTH; x++)
     {
         for (int y = 0; y < HEIGHT; y++) {
@@ -46,14 +46,20 @@ int main(int argc, char* argv[])
 
     bool isRunning = true;
 
-    SFrameBuffer* frameBuffer = new SFrameBuffer(WIDTH, HEIGHT);
-    SPipeline::getInstance().bindFrameBuffer(frameBuffer);
+    FrameBuffer* frameBuffer = new FrameBuffer(WIDTH, HEIGHT);
+    Pipeline::getInstance().bindFrameBuffer(frameBuffer);
 
     Scene scene((float)WIDTH / (float)HEIGHT);
+    //scene.addModelObject("res/Knicker/Air_Gun-Wavefront OBJ.obj", 3);
     //scene.addModelObject("res/nanosuit/nanosuit.obj");
-    //scene.addModelObject("res/Crate/Crate1.obj");
-    //scene.addModelObject("res/spot/spot_triangulated.obj");
-    scene.addModelObject("res/sakura/sakura.obj");
+    //scene.addModelObject("res/cyborg/cyborg.obj", 2);
+    //scene.addModelObject("res/Crate/Crate1.obj", 2);
+    //scene.addModelObject("res/25obj/KSR-29 sniper rifle new_obj.obj");
+    scene.addModelObject("res/E-45-Aircraft/E 45 Aircraft_obj.obj");
+    //scene.addModelObject("res/sakura/Sakura.obj");
+    //scene.addModelObject("res/sakura/Sakura2.obj");
+    //scene.addModelObject("res/rock/rock.obj");
+    //scene.addQuat("res/spot/spot_texture.png");
 
     SDL_Event ev;
 
@@ -75,16 +81,16 @@ int main(int argc, char* argv[])
                     isRunning = false;
                     break;
                 case SDLK_j:
-                    SPipeline::getInstance().setRendererMode(RendererMode::Line);
+                    Pipeline::getInstance().setRendererMode(RendererMode::Line);
                     break;
                 case SDLK_k:
-                    SPipeline::getInstance().setRendererMode(RendererMode::Triangle);
+                    Pipeline::getInstance().setRendererMode(RendererMode::Triangle);
                     break;
                 case SDLK_u:
-                    SPipeline::getInstance().switchBackCulling();
+                    Pipeline::getInstance().switchBackCulling();
                     break;
                 case SDLK_i:
-                    SPipeline::getInstance().switchClipTriangle();
+                    Pipeline::getInstance().switchClipTriangle();
                     break;
                 case SDLK_w:
                     scene.moveCamera(MoveDir::Forward);
@@ -104,8 +110,32 @@ int main(int argc, char* argv[])
                 case SDLK_DOWN:
                     scene.moveCamera(MoveDir::Bottom);
                     break;
+                case SDLK_LEFT:
+                    scene.leftLight();
+                    break;
+                case SDLK_RIGHT:
+                    scene.rightLight();
+                    break;
                 case SDLK_SPACE:
                     scene.resetCamera();
+                    break;
+                case SDLK_KP_1:
+                    scene.setObjectRotate(Vec3f(0, 1, 0), -5);
+                    break;
+                case SDLK_KP_3:
+                    scene.setObjectRotate(Vec3f(0, 1, 0), 5);
+                    break;
+                case SDLK_KP_5:
+                    scene.setObjectRotate(Vec3f(1, 0, 0), 5);
+                    break;
+                case SDLK_KP_2:
+                    scene.setObjectRotate(Vec3f(1, 0, 0), -5);
+                    break;
+                case SDLK_KP_4:
+                    scene.setObjectRotate(Vec3f(0, 0, 1), 5);
+                    break;
+                case SDLK_KP_6:
+                    scene.setObjectRotate(Vec3f(0, 0, 1), -5);
                     break;
                 }
             }
