@@ -19,9 +19,11 @@ Texture TexturePool::getTexture(int idx) {
 
 Texture TexturePool::getTexture(const char* filename) {
 	for (int i = 0; i < texturePool_.size(); i++) {
-		if (strcmp(texturePool_[i].filename, filename) == 0) {
+		/*if (strcmp(texturePool_[i].filename, filename) == 0) {
 			return texturePool_[i];
-		}
+		}*/
+		if(texturePool_[i].filename == filename)
+			return texturePool_[i];
 	}
 
 	Texture texture;
@@ -35,11 +37,13 @@ int TexturePool::pushToCache(Texture tex) {
 	texturePool_.push_back(tex);
 	return texturePool_.size() - 1;
 }
-int TexturePool::isTextureLoaded(const char* filename) {
+int TexturePool::isTextureLoaded(std::string filename) {
 	for (int i = 0; i < texturePool_.size(); i++) {
-		if (strcmp(texturePool_[i].filename, filename) == 0) {
+		/*if (strcmp(texturePool_[i].filename, filename) == 0) {
 			return i;
-		}
+		}*/
+		if (texturePool_[i].filename == filename)
+			return i;
 	}
 	return -1;
 }

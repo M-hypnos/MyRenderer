@@ -828,10 +828,10 @@ private:
 	}
 
 	int loadTexture(std::string path) {
-		int texIdx = TexturePool::getInstance().isTextureLoaded(path.c_str());
+		int texIdx = TexturePool::getInstance().isTextureLoaded(path);
 		if (texIdx < 0) {
 		    Texture texture;
-		    if (texture.loadFromImage(path.c_str(), "")) {
+		    if (texture.loadFromImage(path, "")) {
 		        texIdx = TexturePool::getInstance().pushToCache(texture);
 		    }
 		}

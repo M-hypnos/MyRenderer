@@ -1,9 +1,9 @@
 #include "Texture.h"
 
-bool Texture::loadFromImage(const char* filename, const char* type) {
+bool Texture::loadFromImage(std::string filename, const char* type) {
 	this->filename = filename;
 	this->type = type;
-	surf_ = SDL_ConvertSurfaceFormat(IMG_Load(filename), SDL_PIXELFORMAT_RGBA32, 0);
+	surf_ = SDL_ConvertSurfaceFormat(IMG_Load(filename.c_str()), SDL_PIXELFORMAT_RGBA32, 0);
 	if (surf_ == nullptr) {
 		SDL_Log("Unable to load image %s! SDL_image Error: %s\n", filename, IMG_GetError());
 		return false;

@@ -9,7 +9,7 @@ public:
 	Texture getTexture(int idx);
 	Texture getTexture(const char* filename);
 	int pushToCache(Texture tex);
-	int isTextureLoaded(const char* filename);
+	int isTextureLoaded(std::string filename);
     TexturePool(const TexturePool&) = delete;
     TexturePool(TexturePool&&) = delete;
     TexturePool& operator=(const TexturePool&) = delete;
