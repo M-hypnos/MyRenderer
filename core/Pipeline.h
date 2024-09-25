@@ -20,6 +20,9 @@ public:
     void drawVerts(std::vector<Vertex>& verts, const Material& material);
     void switchBackCulling() { isBackCulling_ = !isBackCulling_; }
     void switchClipTriangle() { isClipTriangle_ = !isClipTriangle_; }
+    void drawRect(int x, int y, int width, int height, Color c);
+
+    void switchRendererMode();
 
     Pipeline(const Pipeline&) = delete;
     Pipeline(Pipeline&&) = delete;
@@ -30,7 +33,7 @@ private:
     ~Pipeline();
 
     void drawMesh(Mesh& mesh);
-    void drawLine(const Vec4f& v1, const Vec4f& v2);
+    void drawLine(const Vec4f& v1, const Vec4f& v2, Color c = Color(255));
     void drawTriangle(shaderVert& v1, shaderVert& v2, shaderVert& v3, const Material& material);
     Vec3f getBarycentricCoordinates(Vec4f& v1, Vec4f& v2, Vec4f& v3, float x, float y);
     bool is_back_facing(Vec4f& v1, Vec4f& v2, Vec4f& v3);

@@ -265,7 +265,56 @@ void Pipeline::drawVerts(std::vector<Vertex>& verts, const Material& material) {
 void Pipeline::drawMesh(Mesh& mesh) {
 	std::vector<shaderVert> vertIn;
 	std::vector<shaderVert> vertTemp;
-	if (rendererMode_ == RendererMode::Line) {
+	if (rendererMode_ == RendererMode::Point) {
+		for (int i = 0; i < mesh.Indices.size(); i += 3) {
+			vertIn.clear();
+			bool isNeedClip = false;
+			for (int j = 0; j < 3; j++) {
+				shaderVert vert;
+				shader_->vertexShader(mesh.Vertices[mesh.Indices[i + j]], vert);
+				vertIn.emplace_back(vert);
+
+				if (!isClipTriangle_ && isOutsidePlane(vert.clip_coords))
+				{
+					isNeedClip = true;
+					break;
+				}
+			}
+
+			if (isNeedClip) continue;
+
+			clip_triangle(vertIn, vertTemp);
+
+			if (vertIn.size() < 3) {
+				for (auto vert : vertIn) {
+					Vec4f v = vert.clip_coords;
+					v.homogeneousAlignment();
+					v = viewport_ * v;
+					if (v.x >= 0 && v.x < frameBuffer_->getWidth() && v.y >= 0 && v.y < frameBuffer_->getHeight())
+						frameBuffer_->writeBuffer(v.x, v.y, Color(255));
+				}
+				continue;
+			}
+
+			Vec4f v0 = vertIn[0].clip_coords;
+			v0.homogeneousAlignment();
+			v0 = viewport_ * v0;
+			Vec4f v1 = vertIn[1].clip_coords;
+			v1.homogeneousAlignment();
+			v1 = viewport_ * v1;
+			Vec4f v2 = vertIn[2].clip_coords;
+			v2.homogeneousAlignment();
+			v2 = viewport_ * v2;
+			if (is_back_facing(v0, v1, v2)) continue;
+			if (v0.x >= 0 && v0.x < frameBuffer_->getWidth() && v0.y >= 0 && v0.y < frameBuffer_->getHeight())
+				frameBuffer_->writeBuffer(v0.x, v0.y, Color(255));
+			if (v1.x >= 0 && v1.x < frameBuffer_->getWidth() && v1.y >= 0 && v1.y < frameBuffer_->getHeight())
+				frameBuffer_->writeBuffer(v1.x, v1.y, Color(255));
+			if (v2.x >= 0 && v2.x < frameBuffer_->getWidth() && v2.y >= 0 && v2.y < frameBuffer_->getHeight())
+				frameBuffer_->writeBuffer(v2.x, v2.y, Color(255));
+		}
+	}
+	else if (rendererMode_ == RendererMode::Line) {
 		for (int i = 0; i < mesh.Indices.size(); i += 3) {
 			vertIn.clear();
 			bool isNeedClip = false;
@@ -343,7 +392,7 @@ void Pipeline::drawMesh(Mesh& mesh) {
 	}
 }
 
-void Pipeline::drawLine(const Vec4f& v1, const Vec4f& v2) {
+void Pipeline::drawLine(const Vec4f& v1, const Vec4f& v2, Color c) {
 	int x1 = v1.x;
 	int y1 = v1.y;
 	int x2 = v2.x;
@@ -366,11 +415,11 @@ void Pipeline::drawLine(const Vec4f& v1, const Vec4f& v2) {
 	for (int x = x1; x <= x2; x++) {
 		if (changeXY) {
 			if (y >= 0 && y < frameBuffer_->getWidth() && x >= 0 && x < frameBuffer_->getHeight())
-				frameBuffer_->writeBuffer(y, x, Color(255));
+				frameBuffer_->writeBuffer(y, x, c);
 		}
 		else {
 			if (x >= 0 && x < frameBuffer_->getWidth() && y >= 0 && y < frameBuffer_->getHeight())
-				frameBuffer_->writeBuffer(x, y, Color(255));
+				frameBuffer_->writeBuffer(x, y, c);
 		}
 		error2 += derror2;
 		if (error2 > dx) {
@@ -416,5 +465,24 @@ void Pipeline::drawTriangle(shaderVert& v1, shaderVert& v2, shaderVert& v3, cons
 				}
 			}
 		}
+	}
+}
+
+void Pipeline::drawRect(int x, int y, int width, int height, Color c) {
+	drawLine(Vec4f(x, y, 0, 0), Vec4f(x + width, y, 0, 0), c);
+	drawLine(Vec4f(x + width, y, 0, 0), Vec4f(x + width, y + height, 0, 0), c);
+	drawLine(Vec4f(x + width, y + height, 0, 0), Vec4f(x, y + height, 0, 0), c);
+	drawLine(Vec4f(x , y, 0, 0), Vec4f(x, y + height, 0, 0), c);
+}
+
+void Pipeline::switchRendererMode() {
+	if (rendererMode_ == RendererMode::Line) {
+		rendererMode_ = RendererMode::Point;
+	}
+	else if (rendererMode_ == RendererMode::Point) {
+		rendererMode_ = RendererMode::Triangle;
+	}
+	else if (rendererMode_ == RendererMode::Triangle) {
+		rendererMode_ = RendererMode::Line;
 	}
 }
