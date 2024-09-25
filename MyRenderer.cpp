@@ -1,10 +1,11 @@
 ﻿#include <iostream>
 #include <SDL.h>
-//#include <vld.h>
+#include <vld.h>
 #include "core/Texture.h"
 #include "core/FrameBuffer.h"
 #include "core/Pipeline.h"
 #include "entity/Scene.h"
+#include <SDL_ttf.h>
 
 int WIDTH = 800;
 int HEIGHT = 600;
@@ -44,18 +45,21 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    if (TTF_Init() == -1) {
+        return 1;
+    }
     bool isRunning = true;
 
     FrameBuffer* frameBuffer = new FrameBuffer(WIDTH, HEIGHT);
     Pipeline::getInstance().bindFrameBuffer(frameBuffer);
 
-    Scene scene((float)WIDTH / (float)HEIGHT);
+    Scene scene((float)WIDTH / (float)HEIGHT, renderer);
     //scene.addModelObject("res/Knicker/Air_Gun-Wavefront OBJ.obj", 3);
-    //scene.addModelObject("res/nanosuit/nanosuit.obj");
+    //scene.addModelObject("res/nanosuit/nanosuit.obj", 1, 2);
     //scene.addModelObject("res/cyborg/cyborg.obj", 2);
     //scene.addModelObject("res/Crate/Crate1.obj", 2);
-    //scene.addModelObject("res/25obj/KSR-29 sniper rifle new_obj.obj");
-    scene.addModelObject("res/E-45-Aircraft/E 45 Aircraft_obj.obj");
+    scene.addModelObject("res/25obj/KSR-29 sniper rifle new_obj.obj");
+    //scene.addModelObject("res/E-45-Aircraft/E 45 Aircraft_obj.obj", 1, 1);
     //scene.addModelObject("res/sakura/Sakura.obj");
     //scene.addModelObject("res/sakura/Sakura2.obj");
     //scene.addModelObject("res/rock/rock.obj");
@@ -85,6 +89,9 @@ int main(int argc, char* argv[])
                     break;
                 case SDLK_k:
                     Pipeline::getInstance().setRendererMode(RendererMode::Triangle);
+                    break;
+                case SDLK_l:
+                    Pipeline::getInstance().setRendererMode(RendererMode::Point);
                     break;
                 case SDLK_u:
                     Pipeline::getInstance().switchBackCulling();
@@ -144,9 +151,11 @@ int main(int argc, char* argv[])
                 int px = ev.button.x;
                 int py = ev.button.y;
                 scene.updateFront(px, py, true);
+                scene.checkClickBtn(px, py, true);
             }
             else if (ev.type == SDL_MOUSEBUTTONUP) {
                 mousePressed = false;
+                scene.checkClickBtn(0, 0, false);
             }
             else if (ev.type == SDL_MOUSEMOTION) {
                 int px = ev.motion.x;
@@ -165,8 +174,8 @@ int main(int argc, char* argv[])
         frameBuffer->clear();
 
         scene.onRender();
-
         onDraw(renderer, frameBuffer);
+        scene.onRenderUI();
 
         frameCount++;
         if (SDL_GetTicks() - start > 1000) {
@@ -184,6 +193,7 @@ int main(int argc, char* argv[])
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+    TTF_Quit();
 
     return 0;
 }
