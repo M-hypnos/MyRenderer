@@ -56,9 +56,9 @@ int main(int argc, char* argv[])
     Scene scene((float)WIDTH / (float)HEIGHT, renderer);
     //scene.addModelObject("res/Knicker/Air_Gun-Wavefront OBJ.obj", 3);
     //scene.addModelObject("res/nanosuit/nanosuit.obj", 1, 2);
-    //scene.addModelObject("res/cyborg/cyborg.obj", 2);
+    scene.addModelObject("res/cyborg/cyborg.obj", 2, 1);
     //scene.addModelObject("res/Crate/Crate1.obj", 2);
-    scene.addModelObject("res/25obj/KSR-29 sniper rifle new_obj.obj");
+    //scene.addModelObject("res/25obj/KSR-29 sniper rifle new_obj.obj");
     //scene.addModelObject("res/E-45-Aircraft/E 45 Aircraft_obj.obj", 1, 1);
     //scene.addModelObject("res/sakura/Sakura.obj");
     //scene.addModelObject("res/sakura/Sakura2.obj");
