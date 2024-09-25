@@ -6,28 +6,7 @@ void LightShader::vertexShader(const Vertex& input, shaderVert& output) {
 	output.world_coords = proj<3>(v);
 	output.clip_coords = projectMat4 * viewMat4 * v;
 	output.normal = proj<3>(MVT * embed<4>(input.normal)).normalize();
-	//output.normal =input.normal;
 }
-
-//Vec3f LightShader::calculateLight(Light* light, Vec3f normal, Vec3f fragPos, Vec3f ka, Vec3f kd, Vec3f ks) {
-//		Vec3f lightDir = (light->position - fragPos).normalize();
-//		float distance = (light->position - fragPos).norm();
-//
-//		Vec3f viewDir = (viewPos - fragPos).normalize();
-//		Vec3f halfVector = (viewDir + lightDir).normalize();
-//
-//		float attenuation = 1.f / (light->constant_ + light->linear_ * distance + light->quadratic_ * distance * distance);
-//		attenuation = 1.f;
-//
-//		float diff = std::max(normal * lightDir, 0.f);
-//		float spec = std::pow(std::max(normal * halfVector, 0.f), 32);
-//
-//		Vec3f diffColor = cwiseProduct(kd, light->diffuse_) * diff * attenuation;
-//		Vec3f ambientColor = cwiseProduct(ka, light->ambient_) * attenuation;
-//		Vec3f specColor = cwiseProduct(ks, light->specular_) * spec * attenuation;
-//		return diffColor + ambientColor + specColor;
-//	}
-//}
 
 Color LightShader::fragmentShader(const shaderVert& v1, const shaderVert& v2, const shaderVert& v3, const Vec3f bc, const Material& material) {
 
