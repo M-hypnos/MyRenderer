@@ -33,6 +33,7 @@ private:
 
 	std::vector<std::vector<Light*>> lightPool_;
 	bool openLight_ = true;
+	bool normalMap_ = true;
 	int lightIdx_;
 };
 

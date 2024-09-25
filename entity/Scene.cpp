@@ -35,6 +35,11 @@ Scene::Scene(float aspectRatio, SDL_Renderer* renderer) {
 	}, "lightShader", renderer_);
 	button_.emplace_back(btn4);
 
+	Button* btn5 = new Button(0, 4 * h, w, h, [&]()->void {
+		normalMap_ = !normalMap_;
+	}, "normalMap", renderer_);
+	button_.emplace_back(btn5);
+
 	{
 		Light* l = new Light();
 		l->position = Vec3f(5.f, 5.f, 5.f);
@@ -152,6 +157,7 @@ void Scene::renderLightShader() {
 	shader->projectMat4 = camera_->getProjectMat4();
 	shader->light = lightPool_[lightIdx_];
 	shader->viewPos = camera_->getEye();
+	shader->normalMap = normalMap_;
 	for (auto obj : objects_) {
 		shader->modelMat4 = obj->getModelMat4();
 		shader->MVT = (shader->viewMat4 * shader->modelMat4).invert_transpose();
