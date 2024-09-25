@@ -7,6 +7,7 @@ class LightShader :
 public:
     std::vector<Light*> light;
     Vec3f viewPos;
+    bool normalMap;
     virtual void vertexShader(const Vertex& input, shaderVert& output);
     virtual Color fragmentShader(const shaderVert& v1, const shaderVert& v2, const shaderVert& v3, const Vec3f bc, const Material& material);
 };
