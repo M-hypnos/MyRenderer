@@ -32,7 +32,14 @@ public:
 	Matrix viewMat4;
 	Matrix projectMat4;
 	Matrix MVT;
-	virtual void vertexShader(const Vertex& input, shaderVert& output) = 0;
+	virtual void vertexShader(const Vertex& v1, const Vertex& v2, const Vertex& v3, std::vector<shaderVert>& output){
+		Vec4f mv1 = modelMat4 * embed<4>(v1.pos);
+		output.emplace_back(projectMat4 * viewMat4 * mv1, proj<3>(MVT * embed<4>(v1.normal)).normalize(), proj<3>(mv1), v1.pos, v1.texcoords);
+		Vec4f mv2 = modelMat4 * embed<4>(v2.pos);
+		output.emplace_back(projectMat4 * viewMat4 * mv2, proj<3>(MVT * embed<4>(v2.normal)).normalize(), proj<3>(mv2), v2.pos, v2.texcoords);
+		Vec4f mv3 = modelMat4 * embed<4>(v3.pos);
+		output.emplace_back(projectMat4 * viewMat4 * mv3, proj<3>(MVT * embed<4>(v3.normal)).normalize(), proj<3>(mv3), v3.pos, v3.texcoords);
+	};
 	virtual Color fragmentShader(const shaderVert& v1, const shaderVert& v2, const shaderVert& v3, const Vec3f bc, const Material& material) = 0;
 };
 

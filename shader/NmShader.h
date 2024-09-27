@@ -1,8 +1,9 @@
 #pragma once
 #include "IShader.h"
 #include "../entity/Light.h"
-class LightShader :
-    public IShader
+
+class NmShader
+   :public IShader
 {
 public:
     std::vector<Light*> light;
