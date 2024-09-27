@@ -26,6 +26,7 @@ public:
 private:
 	void renderTestShader();
 	void renderLightShader();
+	void renderNmShader();
 	Camera* camera_;
 	std::vector< Object*> objects_;
 	SDL_Renderer* renderer_;

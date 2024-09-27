@@ -2,6 +2,7 @@
 #include "../shader/TexShader.h"
 #include "../shader/LightShader.h"
 #include "../shader/WhiteShader.h"
+#include "../shader/NmShader.h"
 #include "../core/Pipeline.h"
 #include "../entity/QuatObject.h"
 
@@ -127,7 +128,7 @@ void Scene::onRender() {
 		renderLightShader();
 	}
 	else {
-		renderTestShader();
+		renderNmShader();
 	}
 }
 
@@ -144,7 +145,7 @@ void Scene::renderTestShader() {
 	shader->projectMat4 = camera_->getProjectMat4();
 	for (auto obj : objects_) {
 		shader->modelMat4 = obj->getModelMat4();
-		shader->MVT = (shader->viewMat4 * shader->modelMat4).invert_transpose();
+		shader->MVT = shader->modelMat4.invert_transpose();
 		obj->onRender();
 	}
 	delete shader;
@@ -160,7 +161,7 @@ void Scene::renderLightShader() {
 	shader->normalMap = normalMap_;
 	for (auto obj : objects_) {
 		shader->modelMat4 = obj->getModelMat4();
-		shader->MVT = (shader->viewMat4 * shader->modelMat4).invert_transpose();
+		shader->MVT = shader->modelMat4.invert_transpose();
 		obj->onRender();
 	}
 	delete shader;
@@ -171,7 +172,34 @@ void Scene::renderLightShader() {
 	lshader->projectMat4 = camera_->getProjectMat4();
 	for (auto l : lightPool_[lightIdx_]) {
 		lshader->modelMat4 = l->getModelMat4();
-		shader->MVT = (shader->viewMat4 * shader->modelMat4).invert_transpose();
+		lshader->MVT = lshader->modelMat4.invert_transpose();
+		l->onRender();
+	}
+	delete lshader;
+}
+
+void Scene::renderNmShader() {
+	NmShader* shader = new NmShader();
+	Pipeline::getInstance().bindShader(shader);
+	shader->viewMat4 = camera_->getViewMat4();
+	shader->projectMat4 = camera_->getProjectMat4();
+	shader->light = lightPool_[lightIdx_];
+	shader->viewPos = camera_->getEye();
+	shader->normalMap = normalMap_;
+	for (auto obj : objects_) {
+		shader->modelMat4 = obj->getModelMat4();
+		shader->MVT = shader->modelMat4.invert_transpose();
+		obj->onRender();
+	}
+	delete shader;
+
+	WhiteShader* lshader = new WhiteShader();
+	Pipeline::getInstance().bindShader(lshader);
+	lshader->viewMat4 = camera_->getViewMat4();
+	lshader->projectMat4 = camera_->getProjectMat4();
+	for (auto l : lightPool_[lightIdx_]) {
+		lshader->modelMat4 = l->getModelMat4();
+		lshader->MVT = lshader->modelMat4.invert_transpose();
 		l->onRender();
 	}
 	delete lshader;
@@ -180,8 +208,9 @@ void Scene::renderLightShader() {
 void Scene::resetCamera() {
 	if (camera_ == nullptr) return;
 	camera_->setParam(cameraEye, cameraFront, cameraUp, cameraFov);
-	if (objects_.size() > 0) {
-		objects_[0]->resetRotate();
+
+	for (auto obj : objects_) {
+		obj->resetRotate();
 	}
 }
 
@@ -220,8 +249,8 @@ void Scene::rightLight() {
 }
 
 void Scene::setObjectRotate(Vec3f direct, float angle) {
-	if (objects_.size() > 0) {
-		objects_[0]->setRotate(direct, angle);
+	for (auto obj : objects_) {
+		obj->setRotate(direct, angle);
 	}
 }
 
