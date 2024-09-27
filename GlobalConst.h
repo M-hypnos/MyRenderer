@@ -3,6 +3,7 @@ enum class RendererMode {
 	Point,
 	Line,
 	Triangle,
+	Normal,
 };
 
 enum class MoveDir {

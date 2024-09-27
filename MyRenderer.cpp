@@ -54,9 +54,9 @@ int main(int argc, char* argv[])
     Pipeline::getInstance().bindFrameBuffer(frameBuffer);
 
     Scene scene((float)WIDTH / (float)HEIGHT, renderer);
-    //scene.addModelObject("res/Knicker/Air_Gun-Wavefront OBJ.obj", 3);
-    //scene.addModelObject("res/nanosuit/nanosuit.obj", 1, 2);
-    scene.addModelObject("res/cyborg/cyborg.obj", 2, 1);
+    //scene.addModelObject("res/Knicker/Air_Gun-Wavefront OBJ.obj", 5);
+    scene.addModelObject("res/nanosuit/nanosuit.obj", 1, 2);
+    //scene.addModelObject("res/cyborg/cyborg.obj", 2, 1);
     //scene.addModelObject("res/Crate/Crate1.obj", 2);
     //scene.addModelObject("res/25obj/KSR-29 sniper rifle new_obj.obj");
     //scene.addModelObject("res/E-45-Aircraft/E 45 Aircraft_obj.obj", 1, 1);
@@ -64,6 +64,11 @@ int main(int argc, char* argv[])
     //scene.addModelObject("res/sakura/Sakura2.obj");
     //scene.addModelObject("res/rock/rock.obj");
     //scene.addQuat("res/spot/spot_texture.png");
+    /*{
+        scene.addModelObject("res/african_head/african_head.obj", 2);
+        scene.addModelObject("res/african_head/african_head_eye_inner.obj", 2);
+        scene.addModelObject("res/african_head/african_head_eye_outer.obj", 2);
+    }*/
 
     SDL_Event ev;
 
