@@ -26,9 +26,6 @@ bool Pipeline::is_back_facing(Vec4f& v11, Vec4f& v22, Vec4f& v33) {
 	Vec4f v1 = v11 / v11.w;
 	Vec4f v2 = v22 / v22.w;
 	Vec4f v3 = v33 / v33.w;
-	/*Vec4f v1 = v11;
-	Vec4f v2 = v22;
-	Vec4f v3 = v33;*/
 
 	if (isBackCulling_) {
 		float signed_area = v1.x * v2.y - v1.y * v2.x +
@@ -55,13 +52,17 @@ void Pipeline::clip_triangleEx(std::vector<shaderVert>& vertIn, std::vector<shad
 				v2 = vertIn[0];
 			else
 				v2 = vertIn[i + 1];
+			//v1在x内
 			if (v1.clip_coords.x >= -v1.clip_coords.w) {
 				vertOut.emplace_back(vertIn[i]);
+				//v2在x外
 				if (v2.clip_coords.x < -v2.clip_coords.w) {
+					//相似三角形求插值
 					float t = (v1.clip_coords.w + v1.clip_coords.x) / ((v1.clip_coords.w + v1.clip_coords.x) - (v2.clip_coords.w + v2.clip_coords.x));
 					vertOut.emplace_back(shaderVert::lerp(v1, v2, t));
 				}
 			}
+			//v1在x外且v2在x内
 			else if(v2.clip_coords.x >= -v2.clip_coords.w){
 				float t = (v2.clip_coords.w + v2.clip_coords.x) / ((v2.clip_coords.w + v2.clip_coords.x) - (v1.clip_coords.w + v1.clip_coords.x));
 				vertOut.emplace_back(shaderVert::lerp(v2, v1, t));
@@ -197,20 +198,16 @@ void Pipeline::drawVerts(std::vector<Vertex>& verts, const Material& material) {
 		for (int i = 0; i < verts.size(); i += 3) {
 			vertIn.clear();
 			int outsideCount = 0;
-			for (int j = 0; j < 3; j++) {
-				shaderVert vert;
-				shader_->vertexShader(verts[i + j], vert);
-
-				if (isOutsidePlane(vert.clip_coords)) {
+			shader_->vertexShader(verts[i], verts[i+1], verts[i+2], vertIn);
+			for (auto vert : vertIn) {
+				if(isOutsidePlane(vert.clip_coords)) {
 					outsideCount++;
 					if (!isClipTriangle_)
 						break;
 				}
-
-				vertIn.emplace_back(vert);
 			}
 
-			if (vertIn.size() < 3) continue;
+			if (!isClipTriangle_ && outsideCount > 0) continue;
 			if (isClipTriangle_ && outsideCount == 3) continue;
 
 			if (is_back_facing(vertIn[0].clip_coords, vertIn[1].clip_coords, vertIn[2].clip_coords)) continue;
@@ -232,21 +229,16 @@ void Pipeline::drawVerts(std::vector<Vertex>& verts, const Material& material) {
 		for (int i = 0; i < verts.size(); i += 3) {
 			vertIn.clear();
 			int outsideCount = 0;
-
-			for (int j = 0; j < 3; j++) {
-				shaderVert vert;
-				shader_->vertexShader(verts[i + j], vert);
-
+			shader_->vertexShader(verts[i], verts[i + 1], verts[i + 2], vertIn);
+			for (auto vert : vertIn) {
 				if (isOutsidePlane(vert.clip_coords)) {
 					outsideCount++;
 					if (!isClipTriangle_)
 						break;
 				}
-
-				vertIn.emplace_back(vert);
 			}
 
-			if (vertIn.size() < 3) continue;
+			if (!isClipTriangle_ && outsideCount > 0) continue;
 			if (isClipTriangle_ && outsideCount == 3) continue;
 
 			if (is_back_facing(vertIn[0].clip_coords, vertIn[1].clip_coords, vertIn[2].clip_coords)) continue;
@@ -274,29 +266,19 @@ void Pipeline::drawVerts(std::vector<Vertex>& verts, const Material& material) {
 		}
 	}
 	else if (rendererMode_ == RendererMode::Triangle) {
-		Vertex tri[3];
 		for (int i = 0; i < verts.size(); i += 3) {
 			vertIn.clear();
-
-			tri[0] = verts[i];
-			tri[1] = verts[i + 1];
-			tri[2] = verts[i + 2];
-
 			int outsideCount = 0;
-			for (int j = 0; j < 3; j++) {
-				shaderVert vert;
-				shader_->vertexShader(tri[j], vert);
+			shader_->vertexShader(verts[i], verts[i + 1], verts[i + 2], vertIn);
+			for (auto vert : vertIn) {
 				if (isOutsidePlane(vert.clip_coords)) {
 					outsideCount++;
 					if (!isClipTriangle_)
 						break;
 				}
-
-				vert.texcoords = tri[j].texcoords;
-				vertIn.emplace_back(vert);
 			}
 
-			if (vertIn.size() < 3) continue;
+			if (!isClipTriangle_ && outsideCount > 0) continue;
 			if (isClipTriangle_ && outsideCount == 3) continue;
 
 			if (is_back_facing(vertIn[0].clip_coords, vertIn[1].clip_coords, vertIn[2].clip_coords)) continue;
@@ -311,6 +293,59 @@ void Pipeline::drawVerts(std::vector<Vertex>& verts, const Material& material) {
 			}
 		}
 	}
+	else if (rendererMode_ == RendererMode::Normal) {
+		for (int i = 0; i < verts.size(); i += 3) {
+			vertIn.clear();
+			int outsideCount = 0;
+			shader_->vertexShader(verts[i], verts[i + 1], verts[i + 2], vertIn);
+			for (auto vert : vertIn) {
+				if (isOutsidePlane(vert.clip_coords)) {
+					outsideCount++;
+					if (!isClipTriangle_)
+						break;
+				}
+			}
+
+			if (!isClipTriangle_ && outsideCount > 0) continue;
+			if (isClipTriangle_ && outsideCount == 3) continue;
+
+			if (is_back_facing(vertIn[0].clip_coords, vertIn[1].clip_coords, vertIn[2].clip_coords)) continue;
+
+			if (outsideCount > 0 && isClipTriangle_) {
+				clip_triangle(vertIn, vertTemp);
+			}
+
+			{
+				Vec4f v0 = vertIn[0].clip_coords;
+				v0.homogeneousAlignment();
+				v0 = viewport_ * v0;
+				Vec4f v1;
+				Vec4f v2 = vertIn[1].clip_coords;
+				v2.homogeneousAlignment();
+				v2 = viewport_ * v2;
+				for (int vi = 1; vi < vertIn.size() - 1; vi++) {
+					v1 = v2;
+					v2 = vertIn[vi + 1].clip_coords;
+					v2.homogeneousAlignment();
+					v2 = viewport_ * v2;
+					drawLine(v0, v1, Color(255, 0, 0));
+					drawLine(v1, v2, Color(255, 0, 0));
+					drawLine(v2, v0, Color(255, 0, 0));
+				}
+			}
+
+			for (auto vert : vertIn) {
+				Vec4f v = vert.clip_coords;
+				v.homogeneousAlignment();
+				v = viewport_ * v;
+				Vec3f p = vert.world_coords + vert.normal * 0.5;
+				Vec4f p1 = shader_->projectMat4 * shader_->viewMat4 * embed<4>(p);
+				p1.homogeneousAlignment();
+				p1 = viewport_ * p1;
+				drawLine(v, p1);
+			}
+		}
+	}
 }
 
 void Pipeline::drawMesh(Mesh& mesh) {
@@ -320,20 +355,16 @@ void Pipeline::drawMesh(Mesh& mesh) {
 		for (int i = 0; i < mesh.Indices.size(); i += 3) {
 			vertIn.clear();
 			int outsideCount = 0;
-			for (int j = 0; j < 3; j++) {
-				shaderVert vert;
-				shader_->vertexShader(mesh.Vertices[mesh.Indices[i + j]], vert);
-
+			shader_->vertexShader(mesh.Vertices[mesh.Indices[i]], mesh.Vertices[mesh.Indices[i + 1]], mesh.Vertices[mesh.Indices[i + 2]], vertIn);
+			for (auto vert : vertIn) {
 				if (isOutsidePlane(vert.clip_coords)) {
 					outsideCount++;
 					if (!isClipTriangle_)
 						break;
 				}
-
-				vertIn.emplace_back(vert);
 			}
 
-			if (vertIn.size() < 3) continue;
+			if (!isClipTriangle_ && outsideCount > 0) continue;
 			if (isClipTriangle_ && outsideCount == 3) continue;
 
 			if (is_back_facing(vertIn[0].clip_coords, vertIn[1].clip_coords, vertIn[2].clip_coords)) continue;
@@ -355,19 +386,16 @@ void Pipeline::drawMesh(Mesh& mesh) {
 		for (int i = 0; i < mesh.Indices.size(); i += 3) {
 			vertIn.clear();
 			int outsideCount = 0;
-			for (int j = 0; j < 3; j++) {
-				shaderVert vert;
-				shader_->vertexShader(mesh.Vertices[mesh.Indices[i + j]], vert);
+			shader_->vertexShader(mesh.Vertices[mesh.Indices[i]], mesh.Vertices[mesh.Indices[i + 1]], mesh.Vertices[mesh.Indices[i + 2]], vertIn);
+			for (auto vert : vertIn) {
 				if (isOutsidePlane(vert.clip_coords)) {
 					outsideCount++;
 					if (!isClipTriangle_)
 						break;
 				}
-
-				vertIn.emplace_back(vert);
 			}
 
-			if (vertIn.size() < 3) continue;
+			if (!isClipTriangle_ && outsideCount > 0) continue;
 			if (isClipTriangle_ && outsideCount == 3) continue;
 
 			if (is_back_facing(vertIn[0].clip_coords, vertIn[1].clip_coords, vertIn[2].clip_coords)) continue;
@@ -395,30 +423,19 @@ void Pipeline::drawMesh(Mesh& mesh) {
 		}
 	}
 	else if (rendererMode_ == RendererMode::Triangle) {
-		Vertex tri[3];
 		for (int i = 0; i < mesh.Indices.size(); i += 3) {
 			vertIn.clear();
-
-			tri[0] = mesh.Vertices[mesh.Indices[i]];
-			tri[1] = mesh.Vertices[mesh.Indices[i + 1]];
-			tri[2] = mesh.Vertices[mesh.Indices[i + 2]];
-
 			int outsideCount = 0;
-			for (int j = 0; j < 3; j++) {
-				shaderVert vert;
-				shader_->vertexShader(tri[j], vert);
-
-				if(isOutsidePlane(vert.clip_coords)) {
+			shader_->vertexShader(mesh.Vertices[mesh.Indices[i]], mesh.Vertices[mesh.Indices[i + 1]], mesh.Vertices[mesh.Indices[i + 2]], vertIn);
+			for (auto vert : vertIn) {
+				if (isOutsidePlane(vert.clip_coords)){
 					outsideCount++;
 					if (!isClipTriangle_)
 						break;
 				}
-
-				vert.texcoords = tri[j].texcoords;
-				vertIn.emplace_back(vert);
 			}
 
-			if (vertIn.size() < 3) continue;
+			if (!isClipTriangle_ && outsideCount > 0) continue;
 			if (isClipTriangle_ && outsideCount == 3) continue;
 
 			if (is_back_facing(vertIn[0].clip_coords, vertIn[1].clip_coords, vertIn[2].clip_coords)) continue;
@@ -430,6 +447,59 @@ void Pipeline::drawMesh(Mesh& mesh) {
 			int count = vertIn.size() - 1;
 			for (int vi = 1; vi < count; vi++) {
 				drawTriangle(vertIn[0], vertIn[vi], vertIn[vi + 1], mesh.MeshMaterial);
+			}
+		}
+	}
+	else if (rendererMode_ == RendererMode::Normal) {
+		for (int i = 0; i < mesh.Indices.size(); i += 3) {
+			vertIn.clear();
+			int outsideCount = 0;
+			shader_->vertexShader(mesh.Vertices[mesh.Indices[i]], mesh.Vertices[mesh.Indices[i + 1]], mesh.Vertices[mesh.Indices[i + 2]], vertIn);
+			for (auto vert : vertIn) {
+				if (isOutsidePlane(vert.clip_coords)) {
+					outsideCount++;
+					if (!isClipTriangle_)
+						break;
+				}
+			}
+
+			if (!isClipTriangle_ && outsideCount > 0) continue;
+			if (isClipTriangle_ && outsideCount == 3) continue;
+
+			if (is_back_facing(vertIn[0].clip_coords, vertIn[1].clip_coords, vertIn[2].clip_coords)) continue;
+
+			if (outsideCount > 0 && isClipTriangle_) {
+				clip_triangle(vertIn, vertTemp);
+			}
+
+			{
+				Vec4f v0 = vertIn[0].clip_coords;
+				v0.homogeneousAlignment();
+				v0 = viewport_ * v0;
+				Vec4f v1;
+				Vec4f v2 = vertIn[1].clip_coords;
+				v2.homogeneousAlignment();
+				v2 = viewport_ * v2;
+				for (int vi = 1; vi < vertIn.size() - 1; vi++) {
+					v1 = v2;
+					v2 = vertIn[vi + 1].clip_coords;
+					v2.homogeneousAlignment();
+					v2 = viewport_ * v2;
+					drawLine(v0, v1, Color(255, 0, 0));
+					drawLine(v1, v2, Color(255, 0, 0));
+					drawLine(v2, v0, Color(255, 0, 0));
+				}
+			}
+
+			for (auto vert : vertIn) {
+				Vec4f v = vert.clip_coords;
+				v.homogeneousAlignment();
+				v = viewport_ * v;
+				Vec3f p = vert.world_coords + vert.normal * 0.5;
+				Vec4f p1 = shader_->projectMat4 * shader_->viewMat4 * embed<4>(p);
+				p1.homogeneousAlignment();
+				p1 = viewport_ * p1;
+				drawLine(v, p1);
 			}
 		}
 	}
@@ -524,6 +594,9 @@ void Pipeline::switchRendererMode() {
 		rendererMode_ = RendererMode::Triangle;
 	}
 	else if (rendererMode_ == RendererMode::Triangle) {
+		rendererMode_ = RendererMode::Normal;
+	}
+	else if (rendererMode_ == RendererMode::Normal) {
 		rendererMode_ = RendererMode::Line;
 	}
 }
